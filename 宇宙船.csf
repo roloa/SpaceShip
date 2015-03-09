@@ -1,0 +1,687 @@
+CSF,0,8,1
+960,540,30,8
+62
+-5,,ｸﾗｽ,,,ExportTop,KyaraImg,MovieClip,3
+,"/*
+キャラメイクから色々触られる
+各パーツの色と使用フレーム
+
+読み込み時にやること
+
+
+
+ほしい関数
+
+キャラデータのロード
+
+
+キャラデータの必要事項と表現形式
+
+
+*/
+function setHadaColor(color_rgb){
+	//肌色が関係するところ全て
+	this.atama_color.setRGB(color_rgb);
+	this.udeLhada_color.setRGB(color_rgb);
+	this.udeRhada_color.setRGB(color_rgb);
+	this.ashiLhada_color.setRGB(color_rgb);
+	this.ashiRhada_color.setRGB(color_rgb);
+}
+function setKamiColor(color_rgb){
+	this.maegami_color.setRGB(color_rgb);
+	//後ろ髪は明度が低い
+	var r = Math.floor((0x0000FF & color_rgb) * 0.8) & 0x0000FF;
+	var g = Math.floor((0x00FF00 & color_rgb) * 0.8) & 0x00FF00;
+	var b = Math.floor((0xFF0000 & color_rgb) * 0.8) & 0xFF0000;
+	color_rgb = (b | g | r);
+	this.ushirogami_color.setRGB(color_rgb);
+}
+function setSubHukuColor(color_rgb){
+	//袖、ズボン、靴のサブ服の色
+	this.sodeL_color.setRGB(color_rgb);
+	this.sodeR_color.setRGB(color_rgb);
+	this.zubonL_color.setRGB(color_rgb);
+	this.zubonR_color.setRGB(color_rgb);
+	//靴は明度が低い
+	var r = Math.floor((0x0000FF & color_rgb) * 0.8) & 0x0000FF;
+	var g = Math.floor((0x00FF00 & color_rgb) * 0.8) & 0x00FF00;
+	var b = Math.floor((0xFF0000 & color_rgb) * 0.8) & 0xFF0000;
+	color_rgb = (b | g | r);
+	this.kutuL_color.setRGB(color_rgb);
+	this.kutuR_color.setRGB(color_rgb);
+}
+//袖タイプ
+function setSode(frame){
+	this.udeL.sode.gotoAndStop(frame);
+	this.udeR.sode.gotoAndStop(frame);
+}
+//ズボンタイプ
+function setZubon(frame){
+	this.ashiL.zubon.gotoAndStop(frame);
+	this.ashiR.zubon.gotoAndStop(frame);
+}
+
+
+
+function setRandom(){
+	//色々な要素をランダムに決める
+	
+	//褐色ぎみ
+	//setHadaColor(0xDDBB99);
+	//ランダム
+	this.setKamiColor(Math.floor(0xFFFFFF * Math.random()));
+	//
+	this.setSubHukuColor(Math.floor(0xFFFFFF * Math.random()));
+	
+	this.huku_color.setRGB(Math.floor(0xFFFFFF * Math.random()));
+	
+	this.huku.gotoAndStop(    1 + Math.floor(3 * Math.random()));
+	this.maegami.gotoAndStop(1 + Math.floor(2 * Math.random()));
+	this.setSode(1 + Math.floor(3 * Math.random()));
+	this.setZubon(1 + Math.floor(3 * Math.random()));
+	
+}
+
+function setBySavedata(savedata){
+	//キャラセーブデータをよみこむ
+	//色データ
+	this.setKamiColor(savedata.kamicolor);
+	//setHadaColor(savedata.hadacolor);
+	this.huku_color.setRGB(savedata.hukucolor);
+	this.setSubHukuColor(savedata.subhukucolor);
+	this.me_color.setRGB(savedata.mecolor);
+	//形状データ
+	this.kao.me.gotoAndStop(savedata.me);
+	this.huku.gotoAndStop(savedata.huku);
+	this.maegami.gotoAndStop(savedata.maegami);
+	this.ushirogami.gotoAndStop(savedata.ushirogami);
+	this.setSode(savedata.sode);
+	this.setZubon(savedata.zubon);
+
+	this.savedata = savedata;
+}
+
+"
+,"
+function onEnterFrame(){
+	
+	if(this.isSitting){
+	
+	
+	
+	} else {
+		var spd = Math.abs(this._parent.vx);
+		if(isNaN(spd)){
+			spd = 0;
+		}
+	
+		if(1 < spd){
+			//udeL._rotation = 180 + _parent.vx * 10;
+			//udeR._rotation = _parent.vx * 10;
+			//速度によって足を動かす
+			this.legrot += spd * Math.sin(this.sinCount * 0.5) * 2;
+			this.sinCount += 1;
+		} else {
+			this.sinCount = 0;
+		}
+		
+		this.ashiR._rotation = (-this.legrot) ;
+		this.ashiL._rotation = ( this.legrot) ;
+		this.udeR._rotation = 60 + (this.legrot) ;
+		this.udeL._rotation = 120 + (-this.legrot) ;
+	
+		this._y = this.legrot * 0.05;
+		this.legrot *= 0.9;
+	
+	}
+
+
+}
+
+//座る系
+function sit(){
+	this.isSitting = true;
+	this.ashiL._visible = false;
+	this.ashiR._visible = false;
+	this.ashiSit._visible = true;
+	//手を前に出す
+	this.udeL._rotation = 170;
+	this.udeR._rotation = 160;
+	
+}
+function unsit(){
+	this.isSitting = false;
+	this.ashiL._visible = true;
+	this.ashiR._visible = true;
+	this.ashiSit._visible = false;
+
+}"
+,"
+
+function onLoad(){
+	this.legrot = 0;
+	this.sinCount = 0;
+	
+	this.udeR.itemImage.gotoAndStop(1);
+	this.udeL.itemImage.gotoAndStop(1);
+	this.hatImage.gotoAndStop(1);
+	
+	//各パーツのカラーオブジェクトを生成
+	this.me_color = new Color(this.kao.me);
+	
+	this.udeLhada_color = new Color(this.udeL.hada);
+	this.udeRhada_color = new Color(this.udeR.hada);
+	this.ashiLhada_color = new Color(this.ashiL.hada);
+	this.ashiRhada_color = new Color(this.ashiR.hada);
+	this.maegami_color = new Color(this.maegami);
+	this.ushirogami_color = new Color(this.ushirogami);
+	this.huku_color = new Color(this.huku);
+	this.sodeL_color = new Color(this.udeL.sode);
+	this.sodeR_color = new Color(this.udeR.sode);
+	this.zubonL_color = new Color(this.ashiL.zubon);
+	this.zubonR_color = new Color(this.ashiR.zubon);
+	this.kutuL_color = new Color(this.ashiL.kutu);
+	this.kutuR_color = new Color(this.ashiR.kutu);
+	//_color = new Color();
+	
+	//ロードイベントのタイミングの関係で色が塗られないので。
+	//一度更新しておく
+	//this.setBySavedata(this.savedata);
+	
+	this.isSitting = false;
+	this.ashiSit._visible = false;
+}
+"
+-5,,ｸﾗｽ,,,ExportTop,Ship,MovieClip,1
+,"function onLoad(){
+	this.vx = 0;
+	this.vy = 0;
+	
+	this.count = 0;
+	this.engine = 0;
+	
+	this.activate();
+}
+
+
+function activate(){
+	this.isActive = true;
+	this.scaleFor = 50;
+}
+function deactivate(){
+	this.isActive = false;
+	this.scaleFor = 250;
+
+}
+function onEnterFrame(){
+	//_rotation = _root._xmouse;
+	this.count++;
+
+	//スクロールに乗る
+	this._x += this.vx + this._parent.vx;
+	this.vx *= 0.9;
+	this._y += this.vy  + this._parent.vy;
+	this.vy *= 0.9;
+
+	//エンジンの推力
+	//this.vx += this.engine * 0.1;
+
+	//武器の動作
+	if(this.weapon1Act){
+		
+	}
+
+	//TODO 着席しているかどうかを確認
+	if(this.isActive){
+		//操縦関係
+		if(Key.isDown(68) || Key.isDown(Key.RIGHT)){
+			this.vx += 1;
+		}
+		if(Key.isDown(65) || Key.isDown(Key.LEFT)){
+			this.vx -= 1;
+		}
+		if(Key.isDown(83) || Key.isDown(Key.DOWN)){
+			this.vy += 1;
+		}
+		if(Key.isDown(87) || Key.isDown(Key.UP)){
+			this.vy -= 1;
+		}
+	} else {
+	}
+	//スケールおよびアクティブ状態操作
+	if(this._xscale == this.scaleFor){
+		if(Key.isDown(Key.SHIFT)){
+			if(this.isActive){
+				this.deactivate();
+			} else {
+				this.activate();
+			}
+		}
+	} else {
+		this._xscale = this._yscale = this._xscale * 0.9 + this.scaleFor * 0.1;
+		if(Math.abs(this.scaleFor - this._xscale) < 10){
+			this._xscale = this._yscale = this.scaleFor;
+		}
+	}
+
+	//エンジンの炎を動かす
+	var sinc = Math.sin(this.count *0.1) ;
+	this.engine1.backfire._xscale = 50 + sinc * 10;
+	this.engine2.backfire._xscale = 50 + sinc * 10;
+}
+
+function onmouseDown(){
+	this.weapon1Act = true;
+}"
+-5,,ｸﾗｽ,,,ExportTop,bgObject,MovieClip,1
+,"/**
+	背景のオブジェクト
+*/
+
+function onEnterFrame(){
+	
+	this._x += this._parent._parent.vx;
+	this._y += this._parent._parent.vy;
+	
+	if(this._x < -500){
+		this._x = 500 + Math.random() * 100;
+		this._y = Math.random() * 540 * 2 - 270 * 2;
+	}
+}"
+-5,,ｸﾗｽ,,,ExportTop,PlayerKyara,MovieClip,1
+,"function onLoad(){
+	this.vx = 0;
+}
+
+
+function onEnterFrame(){
+	
+	
+	this._x += this.vx;
+	this.vx *= 0.5;
+	
+	
+	if(Key.isDown(Key.RIGHT) ){
+		this.vx += 2;
+		this._xscale = -100;
+	}
+	if(Key.isDown(Key.LEFT) ){
+		this.vx -= 2;
+		this._xscale = 100;
+	}
+	
+	
+	if(Key.isDown(Key.UP)){
+		this.img.unsit();
+	}
+	if(Key.isDown(Key.DOWN)){
+		this.img.sit();
+	}
+	
+	
+	if(this._x < -60){
+		this._x = -60;
+	} else if(90 < this._x){
+		this._x = 90;		
+	}
+	
+
+}"
+49,,ｽﾌﾟﾗｲﾄ,,,,ゲーム画面,960,540,480,270,False,0,0,0,0
+51,,ｽﾌﾟﾗｲﾄ,pc,PlayerKyara,ExportTop,プレイヤーキャラクター,70,70,35,70,False,0,0,0,0
+1,,ｽﾌﾟﾗｲﾄ,kyaraImg,KyaraImg,ExportTop,プレイヤーキャラクター画像,100,100,50,100,False,0,0,0,0
+53,,ｽﾌﾟﾗｲﾄ,,,,エンジンの炎,100,100,100,50,False,0,0,0,0
+44,,ｽﾌﾟﾗｲﾄ,,,,エンジン,100,100,50,50,False,0,0,0,0
+43,,ｽﾌﾟﾗｲﾄ,ship,Ship,ExportTop,宇宙船,300,200,150,100,False,0,0,0,0
+46,,ｽﾌﾟﾗｲﾄ,,,,副砲,100,100,50,50,False,0,0,0,0
+48,,ｽﾌﾟﾗｲﾄ,star,bgObject,ExportTop,星,100,100,50,50,False,0,0,0,0
+50,,ｽﾌﾟﾗｲﾄ,,,,背景,960,540,480,270,False,0,0,0,0
+47,.\星.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+52,.\エンジンの炎.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+39,.\宇宙船.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+56,.\宇宙船手前背景.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+40,.\宇宙船エンジン.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+41,.\宇宙船外観.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+42,.\宇宙船背景.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+45,.\副砲.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+-1,,Sﾌｫﾙﾀﾞ,,,,プレイヤーキャラクターのパーツ,39,True
+-1,,Sﾌｫﾙﾀﾞ,,,,ベクタ素材,23,False
+2,..\walker\ロロア前髪.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+3,..\walker\長ズボン.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+4,..\walker\長袖.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+5,..\walker\ロッシ服.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+6,..\walker\ケウィン服.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+7,..\walker\ロロア服.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+8,..\walker\脚.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+9,..\walker\半袖.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+10,..\walker\腕.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+11,..\walker\靴.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+12,..\walker\半ズボン.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+13,..\walker\キャラクターばくあっぷ.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+14,..\walker\キャラクター.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+15,..\walker\顔１.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+16,..\walker\ロロア目.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+17,..\walker\マキ後髪.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+18,..\walker\マキ前髪.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+19,..\walker\後ろ髪ツインテール.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+20,..\walker\後ろ髪2.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+21,..\walker\ロロアハイライト.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+22,..\walker\ツナ前髪.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+23,..\walker\ロロア後髪.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+24,..\チェスディフェンス\ポーン.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+55,,ｽﾌﾟﾗｲﾄ,,,,座り足,100,100,0,0,False,0,0,0,0
+25,,ｽﾌﾟﾗｲﾄ,,,,脚,100,100,40,70,False,0,0,0,0
+26,,ｽﾌﾟﾗｲﾄ,,,,服,100,100,0,0,False,0,0,0,0
+27,,ｽﾌﾟﾗｲﾄ,,,,頭,100,100,0,0,False,0,0,0,0
+28,,ｽﾌﾟﾗｲﾄ,,,,腕本体,100,100,0,0,False,0,0,0,0
+29,,ｽﾌﾟﾗｲﾄ,,,,脚本体,100,100,0,0,False,0,0,0,0
+30,,ｽﾌﾟﾗｲﾄ,,,,靴,100,100,0,0,False,0,0,0,0
+31,,ｽﾌﾟﾗｲﾄ,,,,腕,100,100,50,50,False,0,0,0,0
+32,,ｽﾌﾟﾗｲﾄ,,,,ズボン,100,100,0,0,False,0,0,0,0
+33,,ｽﾌﾟﾗｲﾄ,,,,目,100,100,0,0,False,0,0,0,0
+34,,ｽﾌﾟﾗｲﾄ,,,,顔,100,100,0,0,False,0,0,0,0
+35,,ｽﾌﾟﾗｲﾄ,,,,ハイライト,100,100,0,0,False,0,0,0,0
+36,,ｽﾌﾟﾗｲﾄ,,,,前髪,100,100,0,0,False,0,0,0,0
+37,,ｽﾌﾟﾗｲﾄ,,,,後ろ髪,100,100,0,0,False,0,0,0,0
+38,,ｽﾌﾟﾗｲﾄ,,,,袖,100,100,0,0,False,0,0,0,0
+54,,ｽﾌﾟﾗｲﾄ,,,,テスト用のプレイヤーキャラクター画像,100,100,50,100,False,0,0,0,0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+2
+43,,ship,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,92,278,0,0,True,5000,5000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+50,,,0,,"
+onClipEvent(load){
+	count = 0;
+}
+
+
+onClipEvent(enterFrame){
+
+	if(count++ > 2){
+		count = 0;	
+		var sindo = this.getNextHighestDepth();
+		if(sindo < 20){
+			var star = this.attachMovie(""star"",""star"" + sindo , sindo);
+			//star._x =  Math.random() * 800 - 400;
+			star._x = 400;
+			star._y = Math.random() * 800 - 400;
+		}
+	}
+}",-1,0,0,,,,True,1
+1,1,False,False,True,480,270,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+1
+1,,img,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,35,70,0,0,True,7000,7000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+10
+55,,ashiSit,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+31,,udeR,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,51,50.5,0,0,True,10000,10000,0,100,1550600,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+34,,kao,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+36,,maegami,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+27,,atama,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+26,,huku,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+25,,ashiR,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,56,70.5,0,0,True,10000,10000,0,100,5100,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+25,,ashiL,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,38.5,70.5,0,0,True,10000,10000,0,100,3574400,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+31,,udeL,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,41.5,53,0,0,True,10000,10000,0,100,1638100,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+37,,ushirogami,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+1
+52,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+2
+40,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,-106,-118.5,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+53,,backfire,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,29.5,43.5,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+7
+44,,engine1,0,,"/*
+	ショット
+		ノーマル
+		ガトリング
+	レーザー
+		ノーマル
+		
+	ミサイル
+		ノーマル
+		誘導
+*/",-1,0,0,,,,True,1
+1,1,False,False,True,144.5,132.5,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+41,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,-38,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+56,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,-38,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+51,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,238.5,136,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+42,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,-38,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+46,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,233,143.5,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+44,,engine2,0,,"/*
+	ショット
+		ノーマル
+		ガトリング
+	レーザー
+		ノーマル
+		
+	ミサイル
+		ノーマル
+		誘導
+*/",-1,0,0,,,,True,1
+1,1,False,False,True,144.5,132.5,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+1
+45,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+1
+47,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+0
+2
+11,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,117.5,16.6,0,0,True,10000,10000,0,100,698600,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+11,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,98.6,16.3,0,0,True,10000,10000,0,100,698600,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+2
+30,,kutu,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+29,,hada,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+1
+7,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+1
+15,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+1
+10,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+1
+8,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+1
+11,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+2
+38,,sode,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+28,,hada,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+2
+12,,,0,,,-1,0,0,,,,True,1
+2,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+3,,,0,,,-1,0,0,,,,True,1
+3,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+1
+16,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+2
+35,,highlight,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+33,,me,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+1
+21,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+1
+2,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+1
+23,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+1
+9,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+9
+31,,udeR,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,51,50.5,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+34,,kao,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+36,,maegami,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+27,,atama,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+26,,huku,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+25,,ashiR,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,56,70.5,0,0,True,10000,10000,0,100,240800,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+25,,ashiL,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,38.5,70.5,0,0,True,10000,10000,0,100,254600,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+31,,udeL,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,41.5,53,0,0,True,10000,10000,0,100,1800000,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+37,,ushirogami,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+2
+49,,,0,,"onClipEvent(load){
+
+	//スクロール速度
+	this.vx = -1;
+	this.vy = 0;
+
+	//ship.swapDepths( 200);
+}
+
+onClipEvent(enterFrame){
+	//スクロールのため
+	
+	this.vx = - (this.ship._x * 0.99) - 300;
+	this.vy = - this.ship._y >> 3;
+	
+	this.vx = 0;
+	this.vy = 0;
+
+	//
+	
+}
+
+onClipEvent(keyDown){
+	//trace(Key.getCode());
+}
+
+/**
+	状態
+		航行中
+			上下キーで船を動かす
+			移動先候補を上下で選ぶ
+			左キーでコクピットを離れて船内モードに
+		船内モード
+			おちつけ。
+		イベント処理中
+			戦闘イベント
+			探索イベント
+		
+*/",-1,0,0,,,,True,1
+1,1,False,False,True,480,270,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+-1,,,0,,,-1,0,0,,,,True,1
+1,1,True,False,True,0,0,118

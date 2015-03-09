@@ -1,0 +1,126 @@
+CSF,0,8,1
+1280,640,60,8
+5
+2,.\☆.pdr,ﾍﾞｸﾀ,,,,False,False,0,0,0,0,0,0,0,0,False,False,False,0,0,1024
+3,,ｽﾌﾟﾗｲﾄ,,,,画面,1280,640,0,0,False,0,0,0,0
+4,,ｽﾌﾟﾗｲﾄ,,,,☆が湧いてくる,1280,640,0,0,False,0,0,0,0
+5,,ｽﾌﾟﾗｲﾄ,vanish,,ExportTop,消えちゃう☆,100,100,50,50,False,0,0,0,0
+1,,ｽﾌﾟﾗｲﾄ,star,,ExportTop,スプライト1,100,100,50,50,False,0,0,0,0
+0
+2
+-3,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,,,-1,0,0,,,
+-4,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,,0,True,
+0
+2
+-3,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,,"function onEnterFrame(){
+	_yscale -= 1;
+	_xscale = _yscale;
+	
+	if(_yscale <= 0){
+		this.removeMovieClip();
+	}
+}",-1,0,0,,,
+2,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+2
+-3,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,,"vx = 0;
+vy = 0;
+function onEnterFrame(){
+
+	_x += vx;
+	_y += vy;
+	vx *= 0.5;
+	vy *= 0.5;
+	
+	//ほかの星とぶつかっている場合は移動する
+	var hit = _parent.hitCheck(_x,_y,this);
+	if(hit){
+		vx += Math.random() * 10-5;
+		vy += Math.random() * 10-5;
+	}
+}",-1,0,0,,,
+2,,,0,,,-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,0,0,0,0,0,0,0,0,False
+3
+3,,,0,,"onClipEvent(load){
+
+	stars = new Array();
+
+	testNum = 10;
+
+	function hitCheck(x,y,obj){
+		for(var i=0 ; i < testNum ; i++){
+			if(obj != stars[i] && stars[i].hitTest(x,y,false)){
+				return stars[i];
+			}
+		}
+		return null;
+	}
+	
+	starNum = 0;
+	function register(obj){
+		stars[starNum++] = obj;
+	}
+
+	for(var i=0 ; i < testNum ; i++){
+		var sindo = getNextHighestDepth();
+		newstar = this.attachMovie(""star"",""star"" + sindo,sindo,
+		{_x:Math.random() * 30 + 200  , _y:Math.random() * 30 + 200}
+		);
+		register(newstar);
+	}
+}
+
+onClipEvent(enterFrame){
+	trace(getTimer() -prevTime);
+
+	prevTime = getTimer();
+}",-1,0,0,,,,False,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+4,,,0,,"onClipEvent(load){
+
+	stars = new Array();
+
+	testNum = 10;
+
+	function hitCheck(x,y,obj){
+		for(var i=0 ; i < testNum ; i++){
+			if(obj != stars[i] && stars[i].hitTest(x,y,false)){
+				return stars[i];
+			}
+		}
+		return null;
+	}
+	
+	starNum = 0;
+	function register(obj){
+		stars[starNum++] = obj;
+	}
+
+	for(var i=0 ; i < testNum ; i++){
+
+	}
+}
+
+onClipEvent(mouseDown){
+	//trace(getTimer() -prevTime);
+		var sindo = getNextHighestDepth();
+		newstar = this.attachMovie(""vanish"",""star"" + sindo,sindo,
+		{_x:Math.random() * 30 + 200  , _y:Math.random() * 30 + 200}
+		);
+		trace(sindo);
+		trace(newstar);
+
+	//prevTime = getTimer();
+}",-1,0,0,,,,True,1
+1,1,False,False,True,0,0,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+-1,,,0,,,-1,0,0,,,,True,1
+1,1,True,False,True,255,255,255

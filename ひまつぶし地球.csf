@@ -1,0 +1,41 @@
+CSF,0,8,1
+960,540,30,8
+1
+1,,ｽﾌﾟﾗｲﾄ,,,,スプライト1,960,540,480,270,False,0,0,0,0
+0
+2
+1,,,0,,"onClipEvent(load){
+	
+	height = 4;
+	width = 6;
+	cellH = 10;
+	cellW = 15;
+}
+
+onClipEvent(enterFrame){
+	
+	//
+	lineStyle(1,1);
+	for(var row = -height ; row < height ; row++){
+		//縦列のループ
+		for(var col = -width ; col < width ; col++){
+			//横列のループ
+			
+			//四角を描く
+			beginFill(0x0000FF);
+			moveTo((col  ) * cellW,(row  ) * cellH);
+			lineTo((col+1) * cellW,(row  ) * cellH);
+			lineTo((col+1) * cellW,(row+1) * cellH);
+			lineTo((col  ) * cellW,(row+1) * cellH);
+			endFill();
+		}
+		
+	}
+	
+	
+	
+}",-1,0,0,,,,True,1
+1,1,False,False,True,480,270,0,0,True,10000,10000,0,100,0,0,0,0,XY,False,0,0
+0,False,100,100,100,100,0,0,0,0,False,0,0,0,100,2,2,45,5,1,False,False,True,2,False,4,4,2,False,255,255,0,100,10,10,1,False,False,True,2,False,0,0,0,100,255,255,255,100,2,2,45,5,1,True,False,True,False,2,False,5,5,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,False,False,False,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,0,0,0,1,0,0,False,in,False,0,Left,False,20,
+-1,,,0,,,-1,0,0,,,,True,1
+1,1,True,False,True,255,255,255
